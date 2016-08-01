@@ -4,6 +4,8 @@ import math
 
 http = urllib3.PoolManager()
 
+dairy_words = ['brie', 'feta', 'gouda', 'provolone', 'mozzarella', 'parmesan', 'cheddar', 'butter', 'cream', 'butter', 'milk', 'cheese', 'yogurt']
+
 def get_soup(url):
 	return BeautifulSoup(http.request('GET', url).data, "html.parser").body
 
@@ -19,7 +21,7 @@ def ci_lower_bound(pos, n):
 def ci_lower_bound_5_star(average_rating, rating_count):
     return 100 * ci_lower_bound( int((average_rating - 1) / 4 * rating_count), rating_count)
 	
-print('name, url, ratings, avg, lower bound')
+print('name, url, ratings, avg, lower bound, is_dairy')
 
 for page in range(1, 11):
 	page_of_recipes = get_soup('http://www.budgetbytes.com/category/recipes/page/{}/'.format(page))
@@ -30,6 +32,14 @@ for page in range(1, 11):
 		average_rating_data = single_recipe_page.findAll('span', attrs={'class' : 'average'})
 		rating_count_data = single_recipe_page.findAll('span', attrs={'class' : 'count'})
 		
+		is_dairy = False
+		
+		ingredients = single_recipe_page.findAll('li', attrs={'class' : 'ingredient'})
+		for ingredient in ingredients:
+			ingredient_name = str(ingredient.contents[0])
+			if any(dairy_word in ingredient_name.lower() for dairy_word in dairy_words):
+				is_dairy = True
+		
 		if len(average_rating_data) == 1 & len(rating_count_data) == 1:
 			average_rating = float(average_rating_data[0].contents[0])
 			rating_count = int(rating_count_data[0].contents[0])
@@ -38,5 +48,5 @@ for page in range(1, 11):
 			name = url.split('/')[-2].replace('-', ' ')
 			lower_bound = ci_lower_bound_5_star(average_rating, rating_count)
 
-			print("{}, {}, {}, {}, {}".format(name, url, rating_count, average_rating, lower_bound))
+			print("{}, {}, {}, {}, {}, {}".format(name, url, rating_count, average_rating, lower_bound, is_dairy))
 
