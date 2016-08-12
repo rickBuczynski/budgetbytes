@@ -30,7 +30,7 @@ print('name, url, comments, stars, lower bound, is_dairy')
 page = get_soup_file('seriouseats-recipes-topics-mains')
 #print(page)
 recipeTags = page.findAll('h4', attrs={'class' : 'title'})
-for recipeTag in recipeTags[0:20]:
+for recipeTag in recipeTags:
 	recipe_name = recipeTag.contents[0].contents[0].replace(',','')
 	recipe_url = recipeTag.contents[0].get("href")
 	comment_count_data = get_soup_url(recipe_url).findAll('span', attrs={'class' : 'comment-number'})
